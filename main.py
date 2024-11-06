@@ -1,101 +1,70 @@
 import sys
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLineEdit, QSizePolicy)
-from PyQt6.QtCore import Qt
-from PyQt6.QtSvgWidgets import QSvgWidget
-from PyQt6.QtGui import QIcon, QFont, QFontDatabase
+
+from typing import Union
+
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QFont, QFontDatabase, QColor
+
+from pathlib import Path
+from ui.main_window import Ui_MainWindow
+
+
+FONT_DIRECTORY_PATH = "fonts"
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MelodyHub")  # Устанавливаем заголовок окна
-        self.setFixedSize(1000, 600)
-        # self.setGeometry(100, 100, 700, 400)  # Устанавливаем размеры и позицию окна (x, y, width, height)
-        self.setWindowIcon(QIcon("icons/music_note.svg"))
-        # Установка градиентного фона
-        self.setStyleSheet("""
-            QMainWindow {
-                background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
-                    stop: 0 rgba(167, 198, 237, 255), 
-                    stop: 1 rgba(111, 163, 239, 255));
-            }
-        """)
 
-        ''' Загрузка пользовательского шрифта'''
-        font_id = QFontDatabase.addApplicationFont(
-            "Fonts/Fira_Sans/FiraSans-Bold.ttf"
-        )
-        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]  # Получаем имя шрифта
+        window = Ui_MainWindow()
+        window.setupUi(self)
 
-        # Создаем центральный виджет и компоновщик
-        # central_widget = QWidget()
-        # main_layout = QVBoxLayout(central_widget)
-        # center_layout = QHBoxLayout()
+        font_bold_path = FONT_DIRECTORY_PATH / Path("Fira_Sans/FiraSans-Bold.ttf")
+        font_regular_path = FONT_DIRECTORY_PATH / Path("Fira_Sans/FiraSans-Regular.ttf")
 
-        '''Добавление текста 'MelodyHub'''
-        self.label = QLabel('MelodyHub', self)
-        self.label.setFont(QFont(font_family, 20, QFont.Weight.Bold))
-        self.label.setStyleSheet("""
-            color: #333333;
-        """)
-        self.label.setGeometry(430, 52, 140, 30)
+        font_title = window.title.font()
+        font_search_line = window.search_line.font()
 
-        # # Устанавливаем отступы, чтобы переместить текст вверх
-        # main_layout.addWidget(self.label,
-        #                  alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)  # Выравнивание по верху и по центру
-        # # Устанавливаем вертикальные отступы
-        # main_layout.setContentsMargins(0, 20, 10, 0)  # (left, top, right, bottom)
-        #
-        # # Устанавливаем центральный виджет
-        # self.setCentralWidget(central_widget)
+        self.set_font(window.title, font_path=font_bold_path, pointSize=font_title.pointSize(), weight=font_title.weight())
+        self.set_font(window.search_line, font_path=font_regular_path, pointSize=font_search_line.pointSize())
 
-        '''Добавление поисковой строки'''
-        # Создание иконки поиска
-        self.search_icon = QSvgWidget('icons/search.svg')  # Замените на путь к вашему файлу SVG
-        self.search_icon.setFixedSize(25, 25)  # Установите размер иконки
-        # self.search_icon.setStyleSheet("margin-right: 10px;")  # Отступ справа от иконки
+        print(window.search_line.font().family())
 
-        # Создание поисковой строки
-        self.search_line = QLineEdit()
-        self.search_line.setAlignment(Qt.AlignmentFlag.AlignCenter) # Установка выравнивания текста по центру
-        self.search_line.setPlaceholderText("Поиск...")
-        self.search_line.setStyleSheet("""
-            QLineEdit {
-                background-color: #E6E6FA;  /* Цвет фона */
-                border: 2px solid #D3D3D3;   /* Цвет границы */
-                border-radius: 10px;          /* Закругленные углы */
-                padding: 10px;                /* Отступы */
-                color: black;                  /* Цвет текста */
-            }
-            QLineEdit:focus {
-                border: 2px solid #A0A0FF;    /* Цвет границы при фокусе */
-            }
-            QLineEdit::placeholder {
-                color: #A0A0A0;                /* Цвет текста подсказки */
-                font-style: italic;            /* Курсив для подсказки */
-            }
-        """)
-        # Установка политики фокуса, чтобы строка поиска не была активной при старте
-        self.search_line.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.add_shadow_to_title(window.title)
 
-        # Установка политики размеров
-        self.search_line.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+    def add_shadow_to_title(self, title: QLabel):
+        shadow = QGraphicsDropShadowEffect()
 
-        # Добавление строки поиска в центральный layout
-        # center_layout.addStretch()  # Добавление растягивающего пространства слева
-        # center_layout.addWidget(self.search_icon)  # Добавление иконки поиска
-        # center_layout.addWidget(self.search_line)  # Добавление поисковой строки
-        # center_layout.addStretch()  # Добавление растягивающего пространства справа
-        #
-        # # Добавление центрального layout в основной
-        # main_layout.addLayout(center_layout)  # Центрируем строку поиска
-        # main_layout.addStretch()  # Добавление растягивающего пространства снизу, чтобы центровать по вертикали
-        # # self.setLayout(main_layout) # (Просто ненужная строка)
+        shadow.setXOffset(0)
+        shadow.setYOffset(4)
+
+        shadow.setBlurRadius(4)
+        shadow.setColor(QColor(0, 0, 0, 64))
+
+        title.setGraphicsEffect(shadow)
+
+
+    @staticmethod
+    def set_font(
+            widget: QWidget,
+            font_path: Union[Path, str],
+            **q_font_kwargs
+    ):
+        if type(font_path) is not str:
+            font_path = str(font_path)
+
+        font_id = QFontDatabase.addApplicationFont(font_path)
+        # Получаем имя шрифта
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        font = QFont(font_family, **q_font_kwargs)
+
+        widget.setFont(font)
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)  # Создаем экземпляр приложения
-    window = MainWindow()  # Создаем экземпляр главного окна
-    window.show()  # Показываем главное окно
-    sys.exit(app.exec())  # Запускаем главный цикл приложения
+    app = QApplication(sys.argv)
+
+    main_window = MainWindow()
+    main_window.show()
+
+    sys.exit(app.exec())
