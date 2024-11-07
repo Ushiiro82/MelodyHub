@@ -16,23 +16,26 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        window = Ui_MainWindow()
-        window.setupUi(self)
+        self.window = Ui_MainWindow()
+        self.window.setupUi(self)
 
+        self.init_fonts()
+        self.add_shadow_to_title(self.window.title)
+
+    def init_fonts(self):
         font_bold_path = FONT_DIRECTORY_PATH / Path("Fira_Sans/FiraSans-Bold.ttf")
         font_regular_path = FONT_DIRECTORY_PATH / Path("Fira_Sans/FiraSans-Regular.ttf")
 
-        font_title = window.title.font()
-        font_search_line = window.search_line.font()
+        font_title = self.window.title.font()
+        font_search_line = self.window.search_line.font()
 
-        self.set_font(window.title, font_path=font_bold_path, pointSize=font_title.pointSize(), weight=font_title.weight())
-        self.set_font(window.search_line, font_path=font_regular_path, pointSize=font_search_line.pointSize())
+        self.set_font(self.window.title, font_path=font_bold_path, pointSize=font_title.pointSize(), weight=font_title.weight())
+        self.set_font(self.window.search_line, font_path=font_regular_path, pointSize=font_search_line.pointSize())
 
-        print(window.search_line.font().family())
+        print(self.window.search_line.font().family())
 
-        self.add_shadow_to_title(window.title)
-
-    def add_shadow_to_title(self, title: QLabel):
+    @staticmethod
+    def add_shadow_to_title(title: QLabel):
         shadow = QGraphicsDropShadowEffect()
 
         shadow.setXOffset(0)
@@ -42,7 +45,6 @@ class MainWindow(QMainWindow):
         shadow.setColor(QColor(0, 0, 0, 64))
 
         title.setGraphicsEffect(shadow)
-
 
     @staticmethod
     def set_font(
