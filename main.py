@@ -1,15 +1,14 @@
 import sys
 
-from typing import Union
-
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QFont, QFontDatabase, QColor
+from PyQt6.QtGui import QColor
 
 from pathlib import Path
+
+from menu_button import MenuButton
 from ui.main_window import Ui_MainWindow
-
-
-FONT_DIRECTORY_PATH = "fonts"
+from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH
 
 
 class MainWindow(QMainWindow):
@@ -21,18 +20,29 @@ class MainWindow(QMainWindow):
 
         self.init_fonts()
         self.add_shadow_to_title(self.window.title)
+        self.init_buttons()
+
+    def init_buttons(self):
+        layout = self.window.horizontalLayout
+        path_icons = Path("icons")
+        path_img = Path("img")
+
+        for button_info in [
+            ("Актуальные жанры", path_icons / "album.svg", path_img / "actual_genres.png"),
+            ("Актуальные плагины", path_icons / "graphic_eq.svg", path_img / "actual_plugins.png"),
+            ("Сплиттер mp3", path_icons / "splitscreen.svg", path_img / "splitter.png")
+        ]:
+            button = MenuButton(button_info[0], button_info[1], button_info[2])
+            button.clicked.connect(lambda: print("click"))
+
+            layout.addWidget(button)
 
     def init_fonts(self):
-        font_bold_path = FONT_DIRECTORY_PATH / Path("Fira_Sans/FiraSans-Bold.ttf")
-        font_regular_path = FONT_DIRECTORY_PATH / Path("Fira_Sans/FiraSans-Regular.ttf")
-
         font_title = self.window.title.font()
         font_search_line = self.window.search_line.font()
 
-        self.set_font(self.window.title, font_path=font_bold_path, pointSize=font_title.pointSize(), weight=font_title.weight())
-        self.set_font(self.window.search_line, font_path=font_regular_path, pointSize=font_search_line.pointSize())
-
-        print(self.window.search_line.font().family())
+        set_font(self.window.title, font_path=FONT_BOLD_PATH, pointSize=font_title.pointSize(), weight=font_title.weight())
+        set_font(self.window.search_line, font_path=FONT_REGULAR_PATH, pointSize=font_search_line.pointSize())
 
     @staticmethod
     def add_shadow_to_title(title: QLabel):
@@ -45,22 +55,6 @@ class MainWindow(QMainWindow):
         shadow.setColor(QColor(0, 0, 0, 64))
 
         title.setGraphicsEffect(shadow)
-
-    @staticmethod
-    def set_font(
-            widget: QWidget,
-            font_path: Union[Path, str],
-            **q_font_kwargs
-    ):
-        if type(font_path) is not str:
-            font_path = str(font_path)
-
-        font_id = QFontDatabase.addApplicationFont(font_path)
-        # Получаем имя шрифта
-        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-        font = QFont(font_family, **q_font_kwargs)
-
-        widget.setFont(font)
 
 
 if __name__ == "__main__":
