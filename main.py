@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
 
         ''' Загрузка пользовательского шрифта'''
         font_id = QFontDatabase.addApplicationFont(
-            "Fonts/Fira_Sans/FiraSans-Bold.ttf"
+            "fonts/Fira_Sans/FiraSans-Bold.ttf"
         )
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]  # Получаем имя шрифта
 
