@@ -1,0 +1,5 @@
+venv/
+test*.py
+__pycache__
+output/
+pretrained_models/
