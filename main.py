@@ -1,6 +1,6 @@
 import sys
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QPropertyAnimation, QSize
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QColor
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 from menu_button import MenuButton
 from ui.main_window import Ui_MainWindow
-from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH
+from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH, start_backward_animation
 
 
 class MainWindow(QMainWindow):
@@ -18,9 +18,21 @@ class MainWindow(QMainWindow):
         self.window = Ui_MainWindow()
         self.window.setupUi(self)
 
-        self.init_fonts()
+        self.search_line_focus_animation = QPropertyAnimation(self.window.search_line, b"size")
+
         self.add_shadow_to_title(self.window.title)
+
+        self.init_fonts()
         self.init_buttons()
+        self.init_animations()
+
+    def init_animations(self):
+        self.window.search_line.focusInEvent = lambda _: self.search_line_focus_animation.start()
+        self.window.search_line.focusOutEvent = lambda _: start_backward_animation(self.search_line_focus_animation)
+
+        self.search_line_focus_animation.setDuration(200)
+        self.search_line_focus_animation.setStartValue(self.window.search_line.size())
+        self.search_line_focus_animation.setEndValue(self.window.search_line.size() + QSize(10, 10))
 
     def init_buttons(self):
         layout = self.window.horizontalLayout
