@@ -1,3 +1,5 @@
+from typing import Generator, Dict
+
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote
@@ -10,6 +12,7 @@ HEADERS = {
 
 # URL сайта
 BASE_URL = "https://rus.hitmotop.com/"
+
 
 def search_music(query):
     # Формируем URL для поиска
@@ -26,26 +29,31 @@ def search_music(query):
         print("Ошибка при выполнении запроса:", response.status_code)
         return None, None
 
+
 # Получение имени песни
 def get_song_name(track_info):
     song_name = track_info.find(class_="track__title")
     return song_name.text.strip() if song_name else None
+
 
 # Получение исполнителя песни
 def get_song_artist(track_info):
     song_artist = track_info.find(class_="track__desc")
     return song_artist.text.strip() if song_artist else None
 
+
 # Получение длительности песни
 def get_song_time(track_info):
     song_time = track_info.find(class_="track__time")
     return song_time.text.strip() if song_time else None
+
 
 # Получение ссылки на изображение обложки песни
 def get_image_url_song(track_info):
     image = track_info.find(class_="track__img")
     image_url = image["style"][len("background-image: url('"):][:-3]
     return image_url.strip() if image_url else None
+
 
 # Получение прямой ссылки на скачивание трека
 def get_download_song_url(track_info):
@@ -54,25 +62,16 @@ def get_download_song_url(track_info):
     return link.strip() if link else None
 
 
-if __name__ == "__main__":
-    user_query = input("Введите запрос для поиска музыки: ")
-    result_url, page_content = search_music(user_query)
-
-    if not result_url:
-        exit()
-
-    print("URL страницы с результатами поиска:", result_url)
-
-    # Парсим HTML-код страницы с результатами
+def search(query: str) -> Generator[None, None, Dict[str, str]]:
+    result_url, page_content = search_music(query)
     soup = BeautifulSoup(page_content, "lxml")
 
     # Получаем информацию о всех песнях
     all_songs = soup.select(".tracks__item")  # Каждая песня на странице имеет класс "tracks__item"
-    songs_list = []  # Список для хранения информации о песнях
 
     if not all_songs:
         print("Не удалось найти песни на странице.")
-        exit()
+        return
 
     for track_info in all_songs:
         song_name = get_song_name(track_info)
@@ -83,18 +82,20 @@ if __name__ == "__main__":
 
         # Создаем словарь с информацией о песне
         if song_name and song_artist and song_time:
-            song_info = {
+            yield {
                 "name": song_name,
                 "artist": song_artist,
                 "time": song_time,
                 "img": song_img_url,
                 "dwnld_link": download_song_url
             }
-            songs_list.append(song_info)  # Добавляем словарь в список
         else:
             print("Не удалось найти информацию о песне.")
 
+
+if __name__ == "__main__":
+    user_query = input("Введите запрос для поиска музыки: ")
+
     # Выводим список словарей
-    print("Информация о песнях:")
-    for song in songs_list:
+    for song in search(user_query):
         print(song)

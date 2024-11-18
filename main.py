@@ -1,6 +1,6 @@
 import sys
 
-from PyQt6.QtCore import Qt, QPropertyAnimation, QSize
+from PyQt6.QtCore import Qt, QPropertyAnimation, QSize, pyqtSlot
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QColor
 
@@ -9,6 +9,8 @@ from pathlib import Path
 from menu_button import MenuButton
 from ui.main_window import Ui_MainWindow
 from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH, start_backward_animation
+
+import parsing.hitmo_parser_with_search as hitmo_parser
 
 
 class MainWindow(QMainWindow):
@@ -24,7 +26,11 @@ class MainWindow(QMainWindow):
 
         self.init_fonts()
         self.init_buttons()
-        self.init_animations()
+        # self.init_animations()
+        self.init_events()
+
+    def init_events(self):
+        self.window.search_line.returnPressed.connect(self.search)
 
     def init_animations(self):
         self.window.search_line.focusInEvent = lambda _: self.search_line_focus_animation.start()
@@ -55,6 +61,12 @@ class MainWindow(QMainWindow):
 
         set_font(self.window.title, font_path=FONT_BOLD_PATH, pointSize=font_title.pointSize(), weight=font_title.weight())
         set_font(self.window.search_line, font_path=FONT_REGULAR_PATH, pointSize=font_search_line.pointSize())
+
+    @pyqtSlot()
+    def search(self):
+        query = self.window.search_line.text()
+        for track_info in hitmo_parser.search(query):
+            print(track_info)
 
     @staticmethod
     def add_shadow_to_title(title: QLabel):
