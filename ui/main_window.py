@@ -14,7 +14,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(764, 459)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("ui/icons/music_note.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("icons/music_note.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet("QMainWindow {\n"
 "                background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,\n"

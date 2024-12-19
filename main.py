@@ -1,47 +1,82 @@
 import sys
 
-from PyQt6.QtCore import Qt, QPropertyAnimation, QSize, pyqtSlot
+from PyQt6.QtCore import QPropertyAnimation, QSize
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QColor
 
 from pathlib import Path
 
-from menu_button import MenuButton
+from ui.menu_button import MenuButton
+from ui.track_button import TrackButton
 from ui.main_window import Ui_MainWindow
+from ui.search_result_window import Ui_SearchResultWindow
 from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH, start_backward_animation
 
-import parsing.hitmo_parser_with_search as hitmo_parser
+import parsing.hitmo_parser as hitmo_parser
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.window = Ui_MainWindow()
-        self.window.setupUi(self)
+        self.main_window = Ui_MainWindow()
+        self.window_search_result = Ui_SearchResultWindow()
 
-        self.search_line_focus_animation = QPropertyAnimation(self.window.search_line, b"size")
+        self.main_window.setupUi(self)
 
-        self.add_shadow_to_title(self.window.title)
+        self.search_line = self.main_window.search_line
+
+        self.setMinimumSize(500, 500)
+
+        self.search_line_focus_animation = QPropertyAnimation(self.main_window.search_line, b"size")
+
+        self.add_shadow_to_title(self.main_window.title)
 
         self.init_fonts()
         self.init_buttons()
         # self.init_animations()
         self.init_events()
 
+    def _open(self):
+        self.show()
+
+    def open_search_result_window(self):
+        self.window_search_result.setupUi(self)
+
+        query = self.search_line.text()
+
+        self.search_line = self.window_search_result.search_line
+
+        self.search_line.setText(query)
+        self.search_line.setDisabled(True)
+
+        layout = QVBoxLayout()
+        widget = QWidget()
+
+        for music in hitmo_parser.search(query):
+            layout.addWidget(TrackButton(music.image_url, music.artist, music.name, music.download_link))
+
+        widget.setLayout(layout)
+
+        self.window_search_result.list_search_result.setWidget(widget)
+        self.search_line.setDisabled(False)
+        self.search_line.returnPressed.connect(self.open_search_result_window)
+
+        self._open()
+
     def init_events(self):
-        self.window.search_line.returnPressed.connect(self.search)
+        self.search_line.returnPressed.connect(self.open_search_result_window)
 
     def init_animations(self):
-        self.window.search_line.focusInEvent = lambda _: self.search_line_focus_animation.start()
-        self.window.search_line.focusOutEvent = lambda _: start_backward_animation(self.search_line_focus_animation)
+        self.main_window.search_line.focusInEvent = lambda _: self.search_line_focus_animation.start()
+        self.main_window.search_line.focusOutEvent = lambda _: start_backward_animation(self.search_line_focus_animation)
 
         self.search_line_focus_animation.setDuration(200)
-        self.search_line_focus_animation.setStartValue(self.window.search_line.size())
-        self.search_line_focus_animation.setEndValue(self.window.search_line.size() + QSize(10, 10))
+        self.search_line_focus_animation.setStartValue(self.main_window.search_line.size())
+        self.search_line_focus_animation.setEndValue(self.main_window.search_line.size() + QSize(10, 10))
 
     def init_buttons(self):
-        layout = self.window.horizontalLayout
+        layout = self.main_window.horizontalLayout
         path_icons = Path("icons")
         path_img = Path("img")
 
@@ -56,17 +91,11 @@ class MainWindow(QMainWindow):
             layout.addWidget(button)
 
     def init_fonts(self):
-        font_title = self.window.title.font()
-        font_search_line = self.window.search_line.font()
+        font_title = self.main_window.title.font()
+        font_search_line = self.main_window.search_line.font()
 
-        set_font(self.window.title, font_path=FONT_BOLD_PATH, pointSize=font_title.pointSize(), weight=font_title.weight())
-        set_font(self.window.search_line, font_path=FONT_REGULAR_PATH, pointSize=font_search_line.pointSize())
-
-    @pyqtSlot()
-    def search(self):
-        query = self.window.search_line.text()
-        for track_info in hitmo_parser.search(query):
-            print(track_info)
+        set_font(self.main_window.title, font_path=FONT_BOLD_PATH, pointSize=font_title.pointSize(), weight=font_title.weight())
+        set_font(self.main_window.search_line, font_path=FONT_REGULAR_PATH, pointSize=font_search_line.pointSize())
 
     @staticmethod
     def add_shadow_to_title(title: QLabel):

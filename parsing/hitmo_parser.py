@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 
+from utils import TrackInfo
+
 # Headers
 HEADERS = {
     "Accept": "*/*",
@@ -62,7 +64,7 @@ def get_download_song_url(track_info):
     return link.strip() if link else None
 
 
-def search(query: str) -> Generator[None, None, Dict[str, str]]:
+def search(query: str) -> Generator[TrackInfo, TrackInfo, TrackInfo]:
     result_url, page_content = search_music(query)
     soup = BeautifulSoup(page_content, "lxml")
 
@@ -82,13 +84,13 @@ def search(query: str) -> Generator[None, None, Dict[str, str]]:
 
         # Создаем словарь с информацией о песне
         if song_name and song_artist and song_time:
-            yield {
-                "name": song_name,
-                "artist": song_artist,
-                "time": song_time,
-                "img": song_img_url,
-                "dwnld_link": download_song_url
-            }
+            yield TrackInfo(
+                name=song_name,
+                artist=song_artist,
+                time=song_time,
+                image_url=song_img_url,
+                download_link=download_song_url
+            )
         else:
             print("Не удалось найти информацию о песне.")
 
