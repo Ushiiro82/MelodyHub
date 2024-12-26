@@ -21,9 +21,9 @@ def separate_audio(file_path, output_dir='output'):
 
     print(f"Файл {file_path} успешно разделен. Результаты сохранены в {output_dir}.")
 
-# Пример использования
-if __name__ == '__main__':
-    try:
-        separate_audio('/home/ushiiro/Загрузки/MAYOT_-_Killer_Prod_by_malenkiyyarche_x_kayyo_72877437.mp3')
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
+# # Пример использования
+# if __name__ == '__main__':
+#     try:
+#         separate_audio('/home/ushiiro/Загрузки/MAYOT_-_Killer_Prod_by_malenkiyyarche_x_kayyo_72877437.mp3')
+#     except Exception as e:
+#         print(f"Произошла ошибка: {e}")
