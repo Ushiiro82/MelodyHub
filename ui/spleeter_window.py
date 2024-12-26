@@ -3,7 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from pydub import AudioSegment
-import splitter.main_splitter
+from utils import separate_audio
 import shutil
 
 class AudioSeparatorThread(QtCore.QThread):
@@ -25,7 +25,7 @@ class AudioSeparatorThread(QtCore.QThread):
                 print(f"Progress updated to {progress}%")  # Логирование для отладки
 
             # Вызов функции для разделения аудио
-            splitter.main_splitter.separate_audio(self.file_path)
+            separate_audio(self.file_path)
             self.progress_updated.emit(100)  # Указываем, что процесс завершен
             print("Audio separation completed")  # Логирование для отладки
         except Exception as e:
@@ -225,7 +225,7 @@ class UiForm(object):
         plt.savefig('temp_wave.png')
         plt.close()
 
-        pixmap = QtGui.QPixmap('temp_wave.png')
+        pixmap = QtGui.QPixmap('../img/temp_wave.png')
         label = QtWidgets.QLabel(widget)
         label.setPixmap(pixmap)
         label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
