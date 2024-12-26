@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt, QPropertyAnimation, QSize
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QSpacerItem
+from PyQt6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy
 
 from utils import str_or_path, set_font, FONT_BOLD_PATH, start_backward_animation
 

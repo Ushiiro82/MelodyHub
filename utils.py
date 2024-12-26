@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
+from dataclasses import dataclass, field
 
 from PyQt6.QtCore import QPropertyAnimation
 from PyQt6.QtGui import QFontDatabase, QFont
@@ -14,9 +15,18 @@ str_or_path = Union[Path, str]
 direction = QPropertyAnimation.Direction
 
 
+@dataclass
+class TrackInfo:
+    name: str
+    artist: Optional[str] = field(default=None)
+    time: Optional[str] = field(default=None)
+    image_url: Optional[str] = field(default=None)
+    download_link: Optional[str] = field(default=None)
+
+
 def set_font(
         widget: QWidget,
-        font_path: str_or_path,
+        font_path: str_or_path = FONT_REGULAR_PATH,
         **q_font_kwargs
 ):
     if type(font_path) is not str:
