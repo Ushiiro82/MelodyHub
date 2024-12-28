@@ -1,6 +1,8 @@
 import sys
+from pprint import pprint
+from typing import Callable
 
-from PyQt6.QtCore import QPropertyAnimation, QSize
+from PyQt6.QtCore import QPropertyAnimation, QSize, QObject, pyqtSlot, pyqtSignal, QThread
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QColor
 
@@ -10,9 +12,22 @@ from ui.menu_button import MenuButton
 from ui.track_button import TrackButton
 from ui.main_window import Ui_MainWindow
 from ui.search_result_window import Ui_SearchResultWindow
-from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH, start_backward_animation
+from utils import set_font, FONT_REGULAR_PATH, FONT_BOLD_PATH, start_backward_animation, TrackInfo
 
 import parsing.hitmo_parser as hitmo_parser
+
+
+class ParserThread(QThread):
+    finished = pyqtSignal()
+    found = pyqtSignal(TrackInfo)
+
+    def run(self):
+        query = self.parent().search_line.text()
+
+        for music in hitmo_parser.search(query):
+            self.found.emit(music)
+
+        self.finished.emit()
 
 
 class MainWindow(QMainWindow):
@@ -26,6 +41,8 @@ class MainWindow(QMainWindow):
 
         self.search_line = self.main_window.search_line
 
+        self.parser_thread = ParserThread(self)
+
         self.setMinimumSize(500, 500)
 
         self.search_line_focus_animation = QPropertyAnimation(self.main_window.search_line, b"size")
@@ -36,31 +53,34 @@ class MainWindow(QMainWindow):
         self.init_buttons()
         # self.init_animations()
         self.init_events()
+        self.init_parser_signals()
+
+    def init_parser_signals(self):
+        self.parser_thread.finished.connect(self._finished_parser)
+        self.parser_thread.found.connect(self.add_track_to_results)
+
+    def add_track_to_results(self, music: TrackInfo):
+        track_button = TrackButton(music.image_url, music.artist, music.name, music.download_link)
+        self.window_search_result.list_search_result.widget().layout().addWidget(track_button)
+
+    def _finished_parser(self):
+        self.search_line.setDisabled(False)
+        self.search_line.returnPressed.connect(self.open_search_result_window)
 
     def _open(self):
         self.show()
 
     def open_search_result_window(self):
-        self.window_search_result.setupUi(self)
-
         query = self.search_line.text()
+
+        self.window_search_result.setupUi(self)
 
         self.search_line = self.window_search_result.search_line
 
         self.search_line.setText(query)
         self.search_line.setDisabled(True)
 
-        layout = QVBoxLayout()
-        widget = QWidget()
-
-        for music in hitmo_parser.search(query):
-            layout.addWidget(TrackButton(music.image_url, music.artist, music.name, music.download_link))
-
-        widget.setLayout(layout)
-
-        self.window_search_result.list_search_result.setWidget(widget)
-        self.search_line.setDisabled(False)
-        self.search_line.returnPressed.connect(self.open_search_result_window)
+        self.parser_thread.start()
 
         self._open()
 

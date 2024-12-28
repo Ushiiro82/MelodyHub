@@ -7,6 +7,8 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QVBoxLayout, QWidget
 
 
 class Ui_SearchResultWindow(object):
@@ -92,6 +94,14 @@ class Ui_SearchResultWindow(object):
         self.statusbar = QtWidgets.QStatusBar(parent=SearchResultWindow)
         self.statusbar.setObjectName("statusbar")
         SearchResultWindow.setStatusBar(self.statusbar)
+
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        widget = QWidget()
+
+        widget.setLayout(layout)
+        self.list_search_result.setWidget(widget)
 
         self.retranslateUi(SearchResultWindow)
         QtCore.QMetaObject.connectSlotsByName(SearchResultWindow)
